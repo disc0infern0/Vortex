@@ -14,6 +14,8 @@ public class VortexSystem: Identifiable, Equatable, Hashable {
     /// A public identifier  to satisfy Identifiable
     public let id = UUID()
     
+    let controller: VortexController
+    
     /// Equatable conformance
     public static func == (lhs: VortexSystem, rhs: VortexSystem) -> Bool {
         lhs.id == rhs.id
@@ -23,8 +25,12 @@ public class VortexSystem: Identifiable, Equatable, Hashable {
         hasher.combine(id)
     } 
     /// Virtual 'add' of the Settings properties to the vortex system
-    subscript<T>(dynamicMember keyPath: KeyPath<VortexSettings, T>) -> T {
+    public subscript<T>(dynamicMember keyPath: KeyPath<VortexSettings, T>) -> T {
         settings[keyPath: keyPath]
+    }
+    public subscript<T>(dynamicMember keyPath: WritableKeyPath<VortexSettings, T>) -> T {
+        get { settings[keyPath: keyPath] }
+        set { settings[keyPath: keyPath] = newValue }
     }
 
     // These properties are used for managing a live system, rather
@@ -50,9 +56,6 @@ public class VortexSystem: Identifiable, Equatable, Hashable {
     /// An array containing all the live particles owned by this system.
     var particles = [Particle]()
 
-    /// A set of all active particle systems spawned by this particle system.
-    var activeSecondarySystems = Set<VortexSystem>()
-
     /// The last size at which this particle system was drawn. Used to let us move
     /// to a particle screen location on demand.
     var lastDrawSize = CGSize.zero
@@ -65,8 +68,9 @@ public class VortexSystem: Identifiable, Equatable, Hashable {
     /// Initialise a particle system with a VortexSettings struct
     /// - Parameter settings: VortexSettings    
     /// The settings to be used for this particle system.   
-    public init(_ settings: VortexSettings ) {
+    init(_ settings: VortexSettings, for controller: VortexController ) {
         self.settings = settings
+        self.controller = controller
         // Ensure that randomisation is set correctly if settings are copied.
         // (This is important when creating a secondary system)
         if case let .randomRamp(allColors) = settings.colors {

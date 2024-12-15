@@ -32,19 +32,12 @@ extension VortexSettings {
     @Previewable @State var pressingOptionKey = false
     VortexViewReader { proxy in
         ZStack(alignment: .bottom) {
-            if isDragging {
-                Text("Release your drag to reset the fireflies.")
-                    .padding(.bottom, 20)
-            } else {
-                let instructions = if !pressingOptionKey {
-                    "Drag anywhere to repel the fireflies. Or hold the Option Key"
-                } else {
-                    "Drag anywhere to attract the fireflies"
-                }
-                Text(instructions)
-                    .padding(.bottom, 20)
-            }
-            
+            Text( isDragging ? "Release your drag to reset the fireflies." : {
+                    if !pressingOptionKey {
+                        "Drag anywhere to repel the fireflies. Or hold the Option Key"
+                    } else { "Drag anywhere to attract the fireflies" }
+                }() 
+            )
             VortexView(.fireflies) {
                 Circle()
                     .fill(.white)
@@ -62,11 +55,11 @@ extension VortexSettings {
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         proxy.attractTo(value.location)
-                        proxy.particleSystem?.settings.attractionStrength = pressingOptionKey ? 2.5 : -2
+                        proxy.particleSystem?.attractionStrength = pressingOptionKey ? 2.5 : -2
                         isDragging = true
                     }
                     .onEnded { _ in
-                        proxy.particleSystem?.settings.attractionStrength = 0
+                        proxy.particleSystem?.attractionStrength = 0
                         isDragging = false
                     }
             )

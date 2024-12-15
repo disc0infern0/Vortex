@@ -12,8 +12,8 @@ public struct VortexView<Symbols>: View where Symbols: View {
     /// The list of SwiftUI views that should be used to draw particles.
     @ViewBuilder var symbols: Symbols
 
-    /// The primary system this is responsible for drawing.
-    @State private var particleSystem: VortexSystem
+    /// The primary controller of systems this is responsible for drawing.
+    @State private var controller = VortexController()
 
     /// The ideal frame rate for updating particles. Using lower frame rates saves CPU time.
     public var targetFrameRate: Int
@@ -21,39 +21,21 @@ public struct VortexView<Symbols>: View where Symbols: View {
     public var body: some View {
         TimelineView(.animation(minimumInterval: 1 / Double(targetFrameRate))) { timeline in
             Canvas { context, size in
-                particleSystem.update(date: timeline.date, drawSize: size)
-                draw(particleSystem, into: context, at: size)
+                for system in controller.activeSystems {
+                    system.update(date: timeline.date, drawSize: size)
+                    
+                    if system.particles.isEmpty && system.emissionCount > 0 {
+                        controller.activeSystems.remove(system)
+                        //                system.deinit()
+                    } else {
+                        draw(system, into: context, at: size)
+                    }
+                }
             } symbols: {
                 symbols
             }
         }
-        .preference(key: VortexSystemPreferenceKey.self, value: particleSystem)
-    }
-
-    /// Creates a new VortexView from a pre-configured particle system, along with all the SwiftUI
-    /// views to render as particles.
-    /// - Parameters:
-    ///   - system: The primary particle system you want to render.
-    ///   - symbols: A closure that should return one or more SwiftUI views to use as particles. 
-    ///              If a closure is not supplied, a default group of symbols will be provided; tagged with 'circle', 'confetti' and 'sparkle'.
-    @available(*, deprecated, message: "Deprecated. Invoke the VortexView with a VortexSystem.Settings struct")              
-    public init(
-        _ system: VortexSystem, 
-        targetFrameRate: Int = 60, 
-        @ViewBuilder symbols: () -> Symbols = {
-            Group {
-                Image.circle
-                    .frame(width: 16).blendMode(.plusLighter).tag("circle")
-                Image.confetti
-                    .frame(width: 16, height: 16).blendMode(.plusLighter).tag("confetti") 
-                Image.sparkle
-                    .frame(width: 16, height: 16).blendMode(.plusLighter).tag("sparkle") 
-            }
-        }
-    ) {
-        _particleSystem = State(initialValue: system)
-        self.targetFrameRate = targetFrameRate
-        self.symbols = symbols()
+        .preference( key: VortexSystemPreferenceKey.self, value: controller.primarySystem )
     }
 
     /// Creates a new VortexView from a pre-configured particle system, along with any required  SwiftUI
@@ -66,11 +48,20 @@ public struct VortexView<Symbols>: View where Symbols: View {
     public init(
         _ settings: VortexSettings = .init(),
         targetFrameRate: Int = 60, 
-        @ViewBuilder symbols: () -> Symbols 
+        @ViewBuilder symbols: () -> Symbols = {
+            Group {
+                Image.circle
+                    .frame(width: 16).blendMode(.plusLighter).tag("circle")
+                Image.confetti
+                    .frame(width: 16, height: 16).blendMode(.plusLighter).tag("confetti") 
+                Image.sparkle
+                    .frame(width: 16, height: 16).blendMode(.plusLighter).tag("sparkle") 
+            }
+        }
     ) {
-        _particleSystem = State( initialValue: VortexSystem(settings) ) 
         self.targetFrameRate = targetFrameRate
         self.symbols = symbols()
+        controller.add(VortexSystem(settings, for: controller))
     }
     /// Draws one particle system inside the canvas.
     /// - Parameters:
@@ -127,10 +118,10 @@ public struct VortexView<Symbols>: View where Symbols: View {
             contextCopy.draw(symbol, at: .zero)
         }
 
-        // Now we've finished drawing ourselves, recursively draw
-        // all secondary systems.
-        for secondarySystem in particleSystem.activeSecondarySystems {
-            draw(secondarySystem, into: context, at: size)
-        }
+//        // Now we've finished drawing ourselves, recursively draw
+//        // all secondary systems.
+//        for secondarySystem in particleSystem.activeSecondarySystems {
+//            draw(secondarySystem, into: context, at: size)
+//        }
     }
 }

@@ -100,13 +100,13 @@ public struct VortexSettings: Equatable, Hashable, Identifiable, Codable {
 
     /// When this particle system should be spawned. This is useful only for secondary systems.
     /// Defaults to `.onBirth`
-    public var spawnOccasion: VortexSystem.SpawnOccasion = .onBirth
+    public var spawnOccasion: SpawnOccasion = .onBirth
 
     // These properties control how particles are created.
     /// The shape of this particle system, which controls where particles are created relative to
     /// the system's position.
     /// Defaults to `.point`
-    public var shape: VortexSystem.Shape = .point
+    public var shape: Shape = .point
 
     /// How many particles are created every second. You can use values below 1 here, e.g
     /// a birth rate of 0.2 means one particle being created every 5 seconds.
@@ -207,7 +207,7 @@ public struct VortexSettings: Equatable, Hashable, Identifiable, Codable {
     /// What colors to use for particles made by this system. If `randomRamp` is used
     /// then the VortexSystem initialiser will pick one possible color ramp to use.
     /// A single, white, color is used by default.
-    public var colors: VortexSystem.ColorMode = .single(.white)
+    public var colors: ColorMode = .single(.white)
 
     /// VortexSettings initialisation.
     /// - Parameters: None. Uses sensible default values on initialisation, with no parameters required.
@@ -245,9 +245,9 @@ public struct VortexSettings: Equatable, Hashable, Identifiable, Codable {
     /// Backward compatibility again, for those converting from the old VortexSystem initialiser
     public init(
         tags: [String],
-        spawnOccasion: VortexSystem.SpawnOccasion = .onBirth,
+        spawnOccasion: SpawnOccasion = .onBirth,
         position: SIMD2<Double> = [0.5, 0.5],
-        shape: VortexSystem.Shape = .point,
+        shape: Shape = .point,
         birthRate: Double = 100,
         emissionLimit: Int? = nil,
         emissionDuration: Double = 1,
@@ -266,7 +266,7 @@ public struct VortexSettings: Equatable, Hashable, Identifiable, Codable {
         dampingFactor: Double = 0,
         angularSpeed: SIMD3<Double> = [0, 0, 0],
         angularSpeedVariation: SIMD3<Double> = [0, 0, 0],
-        colors: VortexSystem.ColorMode = .single(.white),
+        colors: ColorMode = .single(.white),
         size: Double = 1,
         sizeVariation: Double = 0,
         sizeMultiplierAtDeath: Double = 1,

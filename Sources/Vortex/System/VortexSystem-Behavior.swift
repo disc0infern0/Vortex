@@ -16,7 +16,6 @@ extension VortexSystem {
     ///   - drawSize: The size of the space we're drawing into.
     func update(date: Date, drawSize: CGSize) {
         lastDrawSize = drawSize
-        updateSecondarySystems(date: date, drawSize: drawSize)
         
         let drawDivisor = drawSize.height / drawSize.width
         let currentTimeInterval = date.timeIntervalSince1970
@@ -108,15 +107,7 @@ extension VortexSystem {
         }
     }
     
-    private func updateSecondarySystems(date: Date, drawSize: CGSize) {
-        for activeSecondarySystem in activeSecondarySystems {
-            activeSecondarySystem.update(date: date, drawSize: drawSize)
-            
-            if activeSecondarySystem.particles.isEmpty && activeSecondarySystem.emissionCount > 0 {
-                activeSecondarySystems.remove(activeSecondarySystem)
-            }
-        }
-    }
+   
     
     /// Used to create a single particle.
     /// - Parameter force: When true, this will create a particle even if
@@ -133,16 +124,13 @@ extension VortexSystem {
         let size = settings.size + settings.sizeVariation.randomSpread()
         let particlePosition = getNewParticlePosition()
 
-        let speed = SIMD2(
-            cos(launchAngle) * launchSpeed,
-            sin(launchAngle) * launchSpeed
-        )
+        let speed = launchSpeed * SIMD2(cos(launchAngle), sin(launchAngle) )
 
         let spinSpeed = settings.angularSpeed + settings.angularSpeedVariation.randomSpread()
         let colorRamp = getNewParticleColorRamp()
 
         let newParticle = Particle(
-            tag: settings.tags.randomElement() ?? "",
+            tag: self.tags.randomElement() ?? "",
             position: particlePosition,
             speed: speed,
             birthTime: lastUpdate,
@@ -167,15 +155,19 @@ extension VortexSystem {
     }
 
     /// Finds and creates any appropriate secondary systems for this particle.
-    func spawn(from particle: Particle, event: SpawnOccasion) {
-        /// Check secondary settings for a new system that should be spawned
-        let matchedSettings = settings.secondarySettings.filter { $0.spawnOccasion == event }
-        for settings in matchedSettings {
-            let newSystem = VortexSystem(settings)
+    ///  events include: .onBirth, .onUpdate, and .onDeath
+    func spawn(from particle: Particle, event: VortexSettings.SpawnOccasion) {
+        let secondarySettings = self.secondarySettings.filter {
+            $0.spawnOccasion == event
+        }
+        
+        for settings in secondarySettings {
+            let newSystem = VortexSystem(settings, for: controller)
             newSystem.settings.position = particle.position
-            activeSecondarySystems.insert(newSystem)
+            controller.add(newSystem)
         }
     }
+   
 
     func getNewParticlePosition() -> SIMD2<Double> {
         switch settings.shape {
@@ -207,7 +199,7 @@ extension VortexSystem {
         }
     }
 
-    func getNewParticleColorRamp() -> [Color] {
+    func getNewParticleColorRamp() -> [VortexSettings.Color] {
         switch settings.colors {
         case .single(let color):
             return [color]

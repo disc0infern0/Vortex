@@ -9,8 +9,6 @@ import SwiftUI
 
 extension VortexSettings {
     /// A built-in splash effect, designed to accompany the rain present.
-    /// Relies on a "circle" tag being present, which should be set to use
-    /// `.blendMode(.plusLighter)`.
     static let splash = VortexSettings { settings in
         
         var drops = VortexSettings { drops in 
@@ -22,9 +20,9 @@ extension VortexSettings {
             drops.angleRange = .degrees(90)
             drops.acceleration = [0, 1]
             drops.colors = .random(
-                VortexSystem.Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.7),
-                VortexSystem.Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.6),
-                VortexSystem.Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.5)
+                Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.7),
+                Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.6),
+                Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.5)
             )
             drops.size = 0.2
             drops.position = [0.5,1]
@@ -35,13 +33,14 @@ extension VortexSettings {
         settings.position = [0.5, 1]
         settings.shape = .box(width: 1, height: 0)
         settings.birthRate = 5
-        settings.lifespan = 0.001
+//        settings.lifespan = 0.001
         settings.speed = 0
         settings.colors = .single(.clear)
         settings.size = 0
     }
 }
-
+/// A sample view demonstrating how to overlap two particle views to create
+/// more complex effects.
 #Preview("Demonstrates a combination rain/splash preset") {
     ZStack {
         VortexView(.rain) {

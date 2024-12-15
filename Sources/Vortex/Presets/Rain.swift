@@ -19,9 +19,9 @@ extension VortexSettings {
         settings.speedVariation = 2
         settings.angle = .degrees(190)
         settings.colors = .random(
-            VortexSystem.Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.6),
-            VortexSystem.Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.5),
-            VortexSystem.Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.4)
+            Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.6),
+            Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.5),
+            Color(red: 0.7, green: 0.7, blue: 1, opacity: 0.4)
         )
         settings.size = 0.09
         settings.sizeVariation = 0.05

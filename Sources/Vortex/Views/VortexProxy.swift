@@ -9,10 +9,15 @@ import SwiftUI
 
 /// A proxy value that supports programmatic access to a Vortex particle system, allowing you
 /// to issue a particle burst, adjust attraction, move the system, and more.
+@dynamicMemberLookup 
 public struct VortexProxy {
     /// The particle system this proxy controls.
     public let particleSystem: VortexSystem?
 
+    /// Virtual 'add' of the Settings properties to the vortex system
+    public subscript<T>(dynamicMember keyPath: KeyPath<VortexSettings, T>) -> T? {
+        particleSystem?.settings[keyPath: keyPath]
+    }
     /// Issues an immediate burst of particles from the nearest particle system, based on whatever
     /// value you set for its `burstCount`.
     public let burst: () -> Void
@@ -26,9 +31,10 @@ public struct VortexProxy {
     public func move(to newPosition: CGPoint) {
         guard let particleSystem else { return }
 
-        particleSystem.settings.position = [
+        particleSystem.position = [
             newPosition.x / particleSystem.lastDrawSize.width,
             newPosition.y / particleSystem.lastDrawSize.height
         ]
     }
+    
 }
